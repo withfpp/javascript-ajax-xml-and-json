@@ -1,72 +1,50 @@
-$(document).ready(function() {
- 
-  // 4 diffrent ways of Ajax by Teo.
-  //1. load
-  $('#load').click(function() {
-    $('#dictionary').load("test.html");
-    return false;
-  });
+//1. load JSON
+var button = document.getElementById('load');
+button.onclick = function(){
+    var request;
+    if (window.XMLHttpRequest){
+        request = new XMLHttpRequest();
+    }else{
+        request = new ActiveXObject("Microsoft.XMLHTTP");
+    }
 
-  //2.ajax
-    $('#ajax').click(function() {
-        $.ajax({
-            url:'sample.xml',
-            type:'GET',
-            dataType: 'xml',
-            success: function(data){
-                $('#dictionary').empty();
-                var count = 0;
-                $.each($(data).find('entry'), function(){
-                    var $entry = $(this);
-                    
-                    count++;
-                    var html ='<div class="entry">';
-                    html +='<h3 class="term">'+ $entry.attr('term'); +'</h3>';
-                    html +='<div class="part">'+ $entry.attr('part'); +'</div>';
-                    html +='<div class="definition">'+  $entry.find('definition').text()+'</div>';
-                    html +='</div>';
-                    $('#dictionary').append(html);
-                });// end each
-                $('#dictionary').append('<p>total ' + count + ' data added.<p>');
-            }// end
-        });// end ajax
-        return false;
-    });
+    request.open('GET', 'sample.json');
+    request.onreadystatechange = function(){
+        if ((request.readyState === 4) && (request.status === 200)) {
+            var items = JSON.parse(request.responseText);
+            var output = '<ul>';
+            for (var key in items){
+                output += '<li>' + items[key].name + '</li>';
+            }
+            output += '<ul>'
+            document.getElementById('update').innerHTML = output;
+        };
+    }
+    request.send();
+};//load AJAX!!!!
 
+//2. load XML
+var button2 = document.getElementById('loadXML');
+button2.onclick = function(){
+    var request;
+    if (window.XMLHttpRequest){
+        request = new XMLHttpRequest();
+    }else{
+        request = new ActiveXObject("Microsoft.XMLHTTP");
+    }
 
-    //3.get
-    $('#get').click(function() {
-        $.get('sample.xml', function(data) { 
-            $('#dictionary').empty();
-            $(data).find('entry').each(function() {
-                var $entry = $(this);
-                var html = '<div class="entry">';
-                html += '<h3 class="term">' + $entry.attr('term');+'</h3>';
-                html += '<div class="part">' + $entry.attr('part');    +'</div>';
-                html += '<div class="definition">' + $entry.text() + '</div>';
-                html += '</div>';
-                $('#dictionary').append(html);
-            });
-        });
-        return false;
-    });
+    request.open('GET', 'sample.xml');
+    request.onreadystatechange = function(){
+        if ((request.readyState === 4) && (request.status === 200)) {
+            var items = request.responseXML.getElementsByTagName('definition');
+            var output = '<ul>';
+            for (var i = 0; i < items.length; i++) {
+                output += '<li>' + items[i].firstChild.nodeValue + '</li>';
+            };
+            output += '</ul>';
 
-    //4.getJSON
-    $('#json').click(function() {
-        $.getJSON('sample.json',function(data){ 
-            $('#dictionary').empty();
-            $.each(data,function(index,entry){
-                var html ='<div class="entry">';
-                html +='<h3 class="term">'+entry.term +'</h3>';
-                html +='<div class="part">'+entry.part +'</div>';
-                html +='<div class="definition">'+ entry.definition+'</div>';
-                html +='</div>';
-                $('#dictionary').append(html);
-            });// end each
-        });// end json
-        return false;
-    });// end click
-
-
-
-});
+            document.getElementById('update').innerHTML = output;
+        }
+    }
+    request.send();
+};
